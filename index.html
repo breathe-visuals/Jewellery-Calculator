@@ -190,7 +190,12 @@ tbody tr { border-bottom: 1px solid var(--border); transition: background 0.2s; 
 tbody tr:last-child { border-bottom: none; }
 tbody tr:hover { background: #F9FAFC; }
 td { padding: 0 16px; font-size: 15px; font-weight: 700; vertical-align: middle; color: var(--text-main); }
-.cid { color: var(--text-muted); font-size: 13px; font-weight: 600; background: #F3F4F6; padding: 4px 10px; border-radius: 999px; }
+.cid {
+  display: inline-block; /* fix bubble stretching in desktop table */
+  color: var(--text-muted); font-size: 12px; font-weight: 700;
+  background: #E6EFEF; color: var(--primary);
+  padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+}
 .camt { font-weight: 800; font-variant-numeric: tabular-nums; }
 .acts { display: flex; gap: var(--sp-sm); }
 
@@ -211,7 +216,11 @@ td { padding: 0 16px; font-size: 15px; font-weight: 700; vertical-align: middle;
 }
 .record-card:active { transform: scale(0.99); }
 .rc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-md); padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-.rc-id { font-weight: 600; color: var(--text-muted); font-size: 13px; background: #F3F4F6; padding: 4px 10px; border-radius: 999px; }
+.rc-id {
+  display: inline-block;
+  font-weight: 700; color: var(--primary); font-size: 12px;
+  background: #E6EFEF; padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+}
 .rc-date { font-size: 13px; color: var(--text-muted); font-weight: 600; }
 .rc-body { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-md); margin-bottom: var(--sp-md); }
 .rc-val { display: flex; flex-direction: column; gap: 4px; }
@@ -247,14 +256,21 @@ td { padding: 0 16px; font-size: 15px; font-weight: 700; vertical-align: middle;
 .bg { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); }
 .bg:hover:not(:disabled) { background: #F9FAFC; color: var(--text-main); }
 
+/* ── Refresh / btn-icon ─────────────────────────────────────── */
 .btn-icon {
-  background: none; border: none; color: var(--primary); font-family: var(--font);
-  font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;
-  transition: all 0.2s; padding: 8px 12px; border-radius: 8px; border: 1px solid transparent; text-transform: uppercase;
+  background: none; border: 1px solid var(--border); color: var(--primary); font-family: var(--font);
+  font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  transition: all 0.2s; padding: 8px 14px; border-radius: 8px;
 }
-.btn-icon:hover { background: var(--primary-bg); }
+.btn-icon svg { flex-shrink: 0; display: block; }
+.btn-icon:hover { background: var(--primary-bg); border-color: var(--primary); }
 .btn-icon:active { transform: scale(0.95); }
 .btn-icon.spinning svg { animation: rot 1s linear infinite; }
+
+/* Records section tint */
+#rec-section {
+  background: #F0F4F4; /* very subtle teal tint to distinguish from form */
+}
 
 /* ── Toast ──────────────────────────────────────────────────── */
 #toast {
@@ -359,11 +375,21 @@ td { padding: 0 16px; font-size: 15px; font-weight: 700; vertical-align: middle;
   /* Action Bar */
   #abar { padding: 12px 16px; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
   .abar-inner { gap: 8px; }
-  .btn { height: 48px; font-size: 13px; padding: 0 6px; }
+  .btn { height: 44px; font-size: 13px; padding: 0 6px; }
   
-  /* Compact form fields on mobile */
-  .field input { height: 44px; font-size: 14px; }
-  .field label { font-size: 11px; }
+  /* Compact form fields on mobile — fit on screen */
+  .field input { height: 40px; font-size: 14px; padding: 0 10px; }
+  .field label { font-size: 10px; margin-bottom: 0; }
+  .field { gap: 3px; }
+  .grid2 { gap: 8px; }
+  .slabel { font-size: 14px; margin-bottom: 10px; }
+  .divider { margin: 10px 0; }
+  .srow { padding: 7px 0; }
+  .srow.big .sv { font-size: 18px; }
+  .prow { margin-top: 10px; gap: 8px; }
+  .pbox { padding: 10px 6px; }
+  .pval { font-size: 14px; }
+  .card-container { padding: 14px; }
 }
 </style>
 </head>
@@ -1025,6 +1051,25 @@ $id('f-l-type').addEventListener('click', function(e) {
 
 ['f-w', 'f-r', 'f-l', 'f-o', 'f-g'].forEach(function (id) {
   $id(id).addEventListener('input', updateSummary);
+});
+
+// ── Enter key navigation between form fields ──────────────────
+var FORM_FIELDS = ['f-name', 'f-date', 'f-w', 'f-r', 'f-l', 'f-o', 'f-g'];
+FORM_FIELDS.forEach(function(id, idx) {
+  var el = $id(id);
+  if (!el) return;
+  el.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    var nextIdx = idx + 1;
+    if (nextIdx < FORM_FIELDS.length) {
+      var next = $id(FORM_FIELDS[nextIdx]);
+      if (next) next.focus();
+    } else {
+      // Last field — blur to close mobile keyboard
+      el.blur();
+    }
+  });
 });
 
 $id('q').addEventListener('input', renderAll);
