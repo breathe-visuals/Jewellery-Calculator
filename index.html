@@ -496,20 +496,27 @@ td { padding: 0 16px; font-size: 15px; font-weight: 700; vertical-align: middle;
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbxJ1owMb1RpzFQ7aW7PdtmQDKngoqP_WuwRt8OHdzQQ0t6M45SZZ9lIrypCaHTCP7o/exec';
 
 // ── GAS API Helper ────────────────────────────────────────────
-/**
- * Calls the Apps Script REST API.
- * Uses Content-Type: text/plain to avoid CORS preflight (OPTIONS) issues.
- * Returns a Promise that resolves to the parsed JSON response.
- */
+var GAS_TIMEOUT_MS = 15000; // 15 second timeout — never hang forever
+
 function gasCall(action, data) {
+  var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  var timer = controller ? setTimeout(function() { controller.abort(); }, GAS_TIMEOUT_MS) : null;
+
   return fetch(GAS_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action: action, data: data || null })
+    body: JSON.stringify({ action: action, data: data || null }),
+    signal: controller ? controller.signal : undefined
   })
   .then(function(res) {
+    if (timer) clearTimeout(timer);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     return res.json();
+  })
+  .catch(function(e) {
+    if (timer) clearTimeout(timer);
+    if (e.name === 'AbortError') throw new Error('Request timed out. Check your connection.');
+    throw e;
   });
 }
 
@@ -925,13 +932,18 @@ function doDelete(id) {
 }
 
 function loadRecords(silent) {
-  if (!silent) $id('loader').style.display = 'grid';
   var rBtn = $id('b-refresh');
   if (rBtn) rBtn.classList.add('spinning');
+  if (!silent) {
+    // Show inline skeleton instead of full-screen overlay
+    var box = $id('tbl-wrap');
+    if (box) box.innerHTML = '<div style="text-align:center; padding: 32px; color: var(--text-muted); font-weight: 600;">Loading records…</div>';
+    var cbox = $id('card-wrap');
+    if (cbox) cbox.innerHTML = '<div style="text-align:center; padding: 32px; color: var(--text-muted); font-weight: 600;">Loading records…</div>';
+  }
 
   gasCall('getCalculations')
     .then(function(recRes) {
-      if (!silent) hideLoader();
       if (rBtn) rBtn.classList.remove('spinning');
       if (!recRes || !recRes.ok) {
         showErr('Records error: ' + (recRes ? recRes.error : 'No response from server'));
@@ -944,7 +956,6 @@ function loadRecords(silent) {
       if (silent) toast('Records refreshed', 'ok');
     })
     .catch(function(e) {
-      if (!silent) hideLoader();
       if (rBtn) rBtn.classList.remove('spinning');
       showErr('Failed to load records: ' + (e.message || e));
       renderAll();
@@ -955,7 +966,12 @@ function init() {
   $id('f-date').value = todayISO();
   $id('f-g').value    = 3;
 
-  // Fire config + records in parallel — much faster than sequential
+  // ─── Show the UI instantly, never block on a spinner ───────────
+  hideLoader();
+  renderAll();
+  updateSummary();
+
+  // ─── Load config + records in parallel in the background ───────
   Promise.all([
     gasCall('getConfig'),
     gasCall('getCalculations')
@@ -971,24 +987,21 @@ function init() {
         if (bizEl) bizEl.textContent = S.config.businessName || 'Jewellery Calculator';
         $id('ph-name').textContent  = S.config.businessName || 'Jewellery Calculator';
         $id('f-g').value            = S.config.defaultGST   || 3;
+        updateSummary();
       } else {
-        showErr('Config error: ' + (cfgRes ? cfgRes.error : 'No response from server'));
+        showErr('Could not load config. Check your Apps Script deployment.');
       }
 
       // Apply records
       if (recRes && recRes.ok) {
         S.records = (recRes.data || []).filter(function (r) { return isValidId(r.calcId); });
+        renderAll();
       } else {
-        showErr('Records error: ' + (recRes ? recRes.error : 'No response from server'));
+        showErr('Could not load records. Tap Refresh to try again.');
       }
-
-      renderAll();
-      updateSummary();
-      hideLoader();
     })
     .catch(function(e) {
-      hideLoader();
-      showErr('Failed to load data: ' + (e.message || e));
+      showErr((e.message || 'Network error') + ' — tap Refresh to retry.');
     });
 }
 
