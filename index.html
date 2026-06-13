@@ -112,6 +112,13 @@ h1, h2 { font-weight: 700; color: var(--primary); text-transform: uppercase; let
 .field input:focus, select:focus { border-color: var(--primary); background: #FFF; box-shadow: 0 0 0 2px var(--primary-bg); }
 .field input::placeholder { color: var(--text-muted); font-weight: 400; }
 
+/* iOS Safari date input fix — prevent overflow */
+input[type="date"] {
+  width: 100%; max-width: 100%; min-width: 0;
+  box-sizing: border-box;
+  -webkit-appearance: none; appearance: none;
+}
+
 .divider { height: 1px; background: var(--border); margin: var(--sp-lg) 0; }
 
 .toggle-group { display: flex; background: #F3F4F6; border-radius: var(--radius-md); padding: 4px; gap: 4px; }
