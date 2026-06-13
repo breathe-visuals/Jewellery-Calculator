@@ -5,9 +5,21 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Jewellery Calculator</title>
 <meta name="description" content="Professional jewellery cost calculator — track metal, labour, GST and generate records.">
+
+<!-- PWA / Installable Web App -->
+<link rel="manifest" href="/Media/site.webmanifest">
+<meta name="theme-color" content="#033C3C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Jewellery Calc">
+<link rel="apple-touch-icon" href="/Media/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/Media/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/Media/favicon-16x16.png">
+<link rel="shortcut icon" href="/Media/favicon.ico">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
 <style>
 /* ── Reset & Variables (Light Teal Theme) ──────────────────────── */
 :root {
@@ -51,22 +63,20 @@ body {
 /* ── Typography ─────────────────────────────────────────────── */
 h1, h2 { font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; }
 
-/* ── Topbar (Navbar) ────────────────────────────────────────── */
+/* ── Topbar (Navbar — Logo Only, Centered) ──────────────── */
 #topbar {
   position: sticky; top: 0; z-index: 50;
   background: var(--primary);
-  border-bottom: 2px solid var(--gold);
+  border-bottom: 3px solid var(--gold);
 }
 .tb-inner {
-  margin: 0 auto; display: flex; align-items: center; justify-content: space-between;
+  margin: 0 auto; display: flex; align-items: center; justify-content: center;
+  height: 90px; padding: 10px 20px;
 }
-.tb-brand { display: flex; align-items: center; gap: 10px; }
-#biz-name { font-weight: 700; color: var(--gold); font-family: cursive; font-size: 28px; }
-#mode-pill {
-  font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 9999px;
-  background: rgba(255,255,255,0.1); color: #FFF; transition: all 0.2s;
+#navbar-logo {
+  height: 70px; width: auto; object-fit: contain;
+  display: block;
 }
-#mode-pill.edit { background: var(--gold); color: var(--primary); }
 
 /* ── Layout & Containers ────────────────────────────────────── */
 .wrap { margin: var(--sp-lg) auto; display: flex; flex-direction: column; gap: var(--sp-xl); }
@@ -78,7 +88,15 @@ h1, h2 { font-weight: 700; color: var(--primary); text-transform: uppercase; let
 .slabel {
   font-size: 18px; font-weight: 700; color: var(--primary);
   margin-bottom: var(--sp-lg); text-transform: uppercase; letter-spacing: 0.05em;
+  display: flex; align-items: center; justify-content: space-between;
 }
+.slabel-actions { display: flex; align-items: center; gap: var(--sp-sm); }
+#mode-pill {
+  font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 9999px;
+  background: var(--primary-bg); color: var(--primary); border: 1px solid var(--primary);
+  transition: all 0.2s; white-space: nowrap;
+}
+#mode-pill.edit { background: var(--gold); color: #FFF; border-color: var(--gold); }
 
 /* ── Forms ──────────────────────────────────────────────────── */
 .grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-md); }
@@ -242,17 +260,45 @@ td { padding: 0 16px; font-size: 15px; font-weight: 700; vertical-align: middle;
 #toast.ok { background: var(--success); }
 #toast.err { background: var(--danger); }
 
-/* ── Print ──────────────────────────────────────────────────── */
+/* ── Print (One-Page Compact) ───────────────────────────────── */
 @media print {
-  #topbar, #abar, #srch-wrap, .acts, .rc-acts, .card-container:nth-child(2) { display: none !important; }
-  body { background: #FFF; color: #000; padding: 0; }
-  .wrap { max-width: 100%; margin: 0; padding: 0; }
-  .card-container { box-shadow: none; border: none; padding: 0; background: transparent; }
-  .field input, .pbox { background: transparent; border: 1px solid #CCC; color: #000; }
-  .srow, .divider { border-color: #CCC; }
-  .sv { color: #000; }
-  .srow.big .sv { color: #000; }
-  #ph { display: block !important; padding-bottom: 16px; border-bottom: 2px solid #000; margin-bottom: 24px; }
+  @page { size: A4 portrait; margin: 10mm 12mm; }
+
+  /* Hide everything except the calculator card */
+  #topbar, #abar, #srch-wrap, .acts, .rc-acts,
+  .card-container:nth-child(2), .prow, .divider, #err-banner { display: none !important; }
+
+  html, body { background: #FFF !important; color: #000 !important; padding: 0 !important; margin: 0 !important; font-size: 11px !important; }
+  body { padding-bottom: 0 !important; }
+
+  .wrap { max-width: 100% !important; margin: 0 !important; padding: 0 !important; gap: 0 !important; }
+  .card-container { box-shadow: none !important; border: none !important; padding: 8px 0 !important; background: transparent !important; }
+
+  /* Print header */
+  #ph { display: block !important; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid #000; }
+  #ph h2 { font-size: 16px !important; font-family: 'Cinzel', Georgia, serif; }
+  #ph p  { font-size: 10px !important; color: #555; }
+
+  /* Section label */
+  .slabel { font-size: 11px !important; margin-bottom: 8px !important; letter-spacing: 0.05em; color: #000; }
+
+  /* Compact 2-col grid */
+  .grid2 { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
+  .full  { grid-column: 1 / -1 !important; }
+  .field { gap: 2px !important; }
+  .field label { font-size: 9px !important; color: #555; }
+  .field input { height: 26px !important; font-size: 11px !important; background: transparent !important; border: 1px solid #CCC !important; color: #000 !important; padding: 0 6px !important; }
+
+  /* Labour inline toggle hidden */
+  .toggle-group { display: none !important; }
+
+  /* Summary rows */
+  .srow { padding: 4px 0 !important; border-bottom: 1px solid #DDD !important; }
+  .sk { font-size: 10px !important; color: #555; }
+  .sv { font-size: 11px !important; color: #000 !important; font-weight: 600; }
+  .srow.big { border-top: 2px solid #000 !important; padding-top: 6px !important; }
+  .srow.big .sk { font-size: 12px !important; font-weight: 700; color: #000; }
+  .srow.big .sv { font-size: 14px !important; font-weight: 800 !important; color: #000 !important; background: none !important; padding: 0 !important; }
 }
 #ph { display: none; }
 #ph h2 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
@@ -262,14 +308,16 @@ td { padding: 0 16px; font-size: 15px; font-weight: 700; vertical-align: middle;
 
 /* Desktop (>= 901px) */
 @media (min-width: 901px) {
-  .tb-inner { height: 72px; padding: 0 32px; max-width: 1280px; }
+  .tb-inner { height: 100px; max-width: 1280px; }
+  #navbar-logo { height: 80px; }
   .wrap { max-width: 1280px; padding: 0 32px; gap: var(--sp-lg); margin-top: var(--sp-xl); }
   .card-container { padding: 32px; }
 }
 
 /* Tablets (769px - 900px) */
 @media (min-width: 769px) and (max-width: 900px) {
-  .tb-inner { height: 64px; padding: 0 24px; max-width: 100%; }
+  .tb-inner { height: 84px; }
+  #navbar-logo { height: 64px; }
   .wrap { max-width: 100%; padding: 0 24px; gap: var(--sp-lg); }
   .card-container { padding: 24px; }
   .tbl-outer { display: none; }
@@ -278,15 +326,16 @@ td { padding: 0 16px; font-size: 15px; font-weight: 700; vertical-align: middle;
 
 /* Mobile Portrait (<= 768px) */
 @media (max-width: 768px) {
-  .tb-inner { height: 60px; padding: 0 16px; }
-  #biz-name { font-size: 24px; }
-  .grid2 { grid-template-columns: 1fr; gap: var(--sp-md); }
+  .tb-inner { height: 72px; padding: 8px 16px; }
+  #navbar-logo { height: 56px; }
+  /* Keep 2-column grid on mobile for tabular feel */
+  .grid2 { grid-template-columns: repeat(2, 1fr); gap: var(--sp-sm); }
   .wrap { max-width: 100%; padding: 0 16px; margin: var(--sp-md) auto; gap: var(--sp-md); }
-  .card-container { padding: 20px; }
+  .card-container { padding: 16px; }
   .tbl-outer { display: none; }
   .card-list { display: flex; flex-direction: column; gap: var(--sp-md); }
   
-  .slabel { margin-bottom: var(--sp-md); font-size: 16px; }
+  .slabel { margin-bottom: var(--sp-md); font-size: 15px; }
   .srow.big .sk { font-size: 16px; }
   .srow.big .sv { font-size: 20px; }
   
@@ -297,13 +346,17 @@ td { padding: 0 16px; font-size: 15px; font-weight: 700; vertical-align: middle;
   .sgrp { justify-content: space-between; }
   #sf { flex: 1; }
   
-  /* Card internals */
-  .rc-body { grid-template-columns: 1fr; gap: 12px; }
+  /* Card internals - keep 2-col */
+  .rc-body { grid-template-columns: 1fr 1fr; gap: 10px; }
   
   /* Action Bar */
   #abar { padding: 12px 16px; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
   .abar-inner { gap: 8px; }
-  .btn { height: 48px; font-size: 14px; padding: 0 8px; }
+  .btn { height: 48px; font-size: 13px; padding: 0 6px; }
+  
+  /* Compact form fields on mobile */
+  .field input { height: 44px; font-size: 14px; }
+  .field label { font-size: 11px; }
 }
 </style>
 </head>
@@ -315,21 +368,22 @@ td { padding: 0 16px; font-size: 15px; font-weight: 700; vertical-align: middle;
 <!-- Print header -->
 <div id="ph"><h2 id="ph-name"></h2><p id="ph-dt"></p></div>
 
-<!-- Top bar -->
+<!-- Top bar: Logo centered only -->
 <div id="topbar">
   <div class="tb-inner">
-    <div class="tb-brand">
-      <span style="font-size:20px">✨</span>
-      <span id="biz-name">Loading…</span>
-    </div>
-    <span id="mode-pill">New Record</span>
+    <img id="navbar-logo" src="/Media/Main.png" alt="Jewellery Calculator">
   </div>
 </div>
 
 <div class="wrap">
   <!-- Form Container -->
   <div class="card-container">
-    <div class="slabel">Calculator Details</div>
+    <div class="slabel">
+      <span>Calculator Details</span>
+      <div class="slabel-actions">
+        <span id="mode-pill">New Record</span>
+      </div>
+    </div>
     <div id="err-banner"></div>
 
     <div class="grid2">
@@ -901,22 +955,40 @@ function init() {
   $id('f-date').value = todayISO();
   $id('f-g').value    = 3;
 
-  gasCall('getConfig')
-    .then(function(cfgRes) {
-      if (!cfgRes || !cfgRes.ok) {
+  // Fire config + records in parallel — much faster than sequential
+  Promise.all([
+    gasCall('getConfig'),
+    gasCall('getCalculations')
+  ])
+    .then(function(results) {
+      var cfgRes = results[0];
+      var recRes = results[1];
+
+      // Apply config
+      if (cfgRes && cfgRes.ok) {
+        S.config = cfgRes.data;
+        var bizEl = $id('biz-name');
+        if (bizEl) bizEl.textContent = S.config.businessName || 'Jewellery Calculator';
+        $id('ph-name').textContent  = S.config.businessName || 'Jewellery Calculator';
+        $id('f-g').value            = S.config.defaultGST   || 3;
+      } else {
         showErr('Config error: ' + (cfgRes ? cfgRes.error : 'No response from server'));
-        hideLoader();
-        return;
       }
-      S.config = cfgRes.data;
-      $id('biz-name').textContent  = S.config.businessName || 'Jewellery Calculator';
-      $id('ph-name').textContent   = S.config.businessName || 'Jewellery Calculator';
-      $id('f-g').value             = S.config.defaultGST   || 3;
-      loadRecords(false);
+
+      // Apply records
+      if (recRes && recRes.ok) {
+        S.records = (recRes.data || []).filter(function (r) { return isValidId(r.calcId); });
+      } else {
+        showErr('Records error: ' + (recRes ? recRes.error : 'No response from server'));
+      }
+
+      renderAll();
+      updateSummary();
+      hideLoader();
     })
     .catch(function(e) {
       hideLoader();
-      showErr('Failed to load config: ' + (e.message || e));
+      showErr('Failed to load data: ' + (e.message || e));
     });
 }
 
