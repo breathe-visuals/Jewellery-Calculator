@@ -186,18 +186,25 @@ thead th:hover { background: var(--primary-hover); }
 .thi { display: flex; align-items: center; gap: 6px; }
 .arr { opacity: 0.5; font-size: 14px; }
 th.on .arr { opacity: 1; color: var(--gold); }
-tbody tr { border-bottom: 1px solid var(--border); transition: background 0.2s; height: 60px; }
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.2s; height: 52px; }
 tbody tr:last-child { border-bottom: none; }
 tbody tr:hover { background: #F9FAFC; }
-td { padding: 0 16px; font-size: 15px; font-weight: 700; vertical-align: middle; color: var(--text-main); }
+td {
+  padding: 0 14px; font-size: 14px; font-weight: 700;
+  vertical-align: middle; color: var(--text-main);
+  /* force cell to respect row height and center content */
+  height: inherit; line-height: 1;
+}
+td > * { vertical-align: middle; }
 .cid {
-  display: inline-block; /* fix bubble stretching in desktop table */
-  color: var(--text-muted); font-size: 12px; font-weight: 700;
+  display: inline-block;
+  font-size: 11px; font-weight: 700;
   background: #E6EFEF; color: var(--primary);
-  padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+  padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+  line-height: 1.4;
 }
 .camt { font-weight: 800; font-variant-numeric: tabular-nums; }
-.acts { display: flex; gap: var(--sp-sm); }
+.acts { display: flex; gap: 6px; align-items: center; }
 
 /* Action Buttons (Table & Card) */
 .ab {
@@ -208,26 +215,33 @@ td { padding: 0 16px; font-size: 15px; font-weight: 700; vertical-align: middle;
 .ab.del { color: var(--danger); border-color: var(--danger-bg); }
 .ab.del:hover { background: var(--danger-bg); border-color: var(--danger); }
 
-/* ── Cards (Tablet & Mobile) ────────────────────────────────── */
+/* ── Cards (Tablet & Mobile) ──────────────────────────────── */
 .card-list { display: none; }
 .record-card {
-  border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--sp-md); background: var(--surface);
-  transition: transform 0.2s;
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px 12px; background: var(--surface);
+  transition: transform 0.15s;
 }
 .record-card:active { transform: scale(0.99); }
-.rc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-md); padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.rc-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
 .rc-id {
   display: inline-block;
-  font-weight: 700; color: var(--primary); font-size: 12px;
-  background: #E6EFEF; padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+  font-weight: 700; color: var(--primary); font-size: 11px;
+  background: #E6EFEF; padding: 3px 8px; border-radius: 999px; white-space: nowrap;
 }
-.rc-date { font-size: 13px; color: var(--text-muted); font-weight: 600; }
-.rc-body { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-md); margin-bottom: var(--sp-md); }
-.rc-val { display: flex; flex-direction: column; gap: 4px; }
-.rc-lbl { font-size: 12px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; }
-.rc-txt { font-size: 15px; font-weight: 800; color: var(--text-main); }
-.rc-acts { display: flex; gap: 12px; justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 12px; }
-.rc-acts .ab { height: 44px; padding: 0 20px; }
+.rc-date { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+.rc-body {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 6px 10px; margin-bottom: 8px;
+}
+.rc-val { display: flex; flex-direction: column; gap: 1px; }
+.rc-lbl { font-size: 10px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+.rc-txt { font-size: 13px; font-weight: 800; color: var(--text-main); }
+.rc-acts { display: flex; gap: 8px; justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 8px; }
+.rc-acts .ab { height: 34px; padding: 0 14px; font-size: 12px; }
 
 /* ── Action Bar ─────────────────────────────────────────────── */
 #abar {
@@ -356,8 +370,16 @@ td { padding: 0 16px; font-size: 15px; font-weight: 700; vertical-align: middle;
   .wrap { max-width: 100%; padding: 0 16px; margin: var(--sp-md) auto; gap: var(--sp-md); }
   .card-container { padding: 16px; }
   .tbl-outer { display: none; }
-  .card-list { display: flex; flex-direction: column; gap: var(--sp-md); }
-  
+  .card-list { display: flex; flex-direction: column; gap: 6px; }
+  /* Even more compact cards at mobile */
+  .record-card { padding: 8px 10px; border-radius: 8px; }
+  .rc-header { margin-bottom: 6px; padding-bottom: 6px; }
+  .rc-body { gap: 4px 8px; margin-bottom: 6px; }
+  .rc-lbl { font-size: 9px; }
+  .rc-txt { font-size: 12px; }
+  .rc-acts { padding-top: 6px; gap: 6px; }
+  .rc-acts .ab { height: 30px; padding: 0 10px; font-size: 11px; }
+
   .slabel { margin-bottom: var(--sp-md); font-size: 15px; }
   .srow.big .sk { font-size: 16px; }
   .srow.big .sv { font-size: 20px; }
